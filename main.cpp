@@ -7,9 +7,7 @@
 #include "recarga_segura.hpp"
 #include "catalogo_sensores.hpp"
 #include "energia.hpp"
-#include "solar.hpp"
 #include "bateria.hpp"
-#include "powerBank.hpp"
 #include "kart.hpp"
 #include "sensor.hpp"
 #include "kart_configuravel.hpp"
@@ -168,36 +166,7 @@ int main() {
     kart1.registrarVolta(60.9);
     kart1.registrarVolta(-2.0); // Vai recusar
 
-    // --- TESTES DE ENERGIA E SOL ---
-    Energia e1{60}, e2{60}, e3{90};
-
-    if (e1 == e2) std::cout << "e1 == e2: Verdadeiro\n";
-    if (e1 != e3) std::cout << "e1 != e3: Verdadeiro\n";
-    if (e1 < e3)  std::cout << "e1 < e3: Verdadeiro\n";
-
-    TempoSol totalSol{0};
-    totalSol += TempoSol{15};
-    totalSol += TempoSol{15};
-
-    PlacaSolar placa{PotenciaSolar{240}};
-    Energia solar = placa.gerar(totalSol);
-    std::cout << "Energia gerada pelo sol: " << solar.emWh() << " Wh\n\n";
-
-    // --- TESTES DE POWERBANK E BATERIA ---
-    PowerBank powerBank1{120};
-    powerBank1.carregar(solar);
-
     Bateria bateria1{100, 20};
-
-    // Primeira transferência
-    const bool transf1 = powerBank1.transferirPara(bateria1, Energia{60});
-    std::cout << "Transferência de 60 Wh: " << (transf1 ? "Aceita" : "Recusada") << std::endl;
-    std::cout << "Carga da Bateria: " << bateria1.getCargaWh() << " Wh\n" << std::endl;
-
-    // Segunda transferência 
-    const bool transf2 = powerBank1.transferirPara(bateria1, Energia{30});
-    std::cout << "Transferência de 30 Wh: " << (transf2 ? "Aceita" : "Recusada") << std::endl;
-    std::cout << "Carga da Bateria: " << bateria1.getCargaWh() << " Wh\n" << std::endl;
 
     // --- 4. TESTE DO EBOOST NO KART ---
     const int velAntes = kart1.getVelocidadeKmh();
