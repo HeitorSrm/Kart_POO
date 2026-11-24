@@ -2,8 +2,6 @@
 #include <iostream>
 #include <string>
 #include <cmath> 
-#include "bateria.hpp"
-#include "energia.hpp"
 #include "sensor.hpp"
 
 
@@ -166,24 +164,4 @@ Duracao& Duracao::operator-=(Duracao outra) {
 Duracao& Duracao::operator+=(Duracao outra) {
     segundos_ += outra.emSegundos();
     return *this;
-}
-
-bool Kart::ativarEBoost(Bateria& bateria, Energia energiaNecessaria, int bonusKmh) {
-    if (bonusKmh <= 0 || energiaNecessaria.emWh() <= 0) {
-        return false;
-    }
-
-    int velocidadeAux = velocidadeKmh_ + bonusKmh;
-    if (velocidadeAux > 120) {
-        return false;
-    }
-
-    if (!bateria.podeFornecer(energiaNecessaria)) {
-        return false;
-    }
-
-    bateria.consumir(energiaNecessaria);
-    velocidadeKmh_ = velocidadeAux;
-
-    return true;
 }

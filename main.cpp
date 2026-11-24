@@ -2,8 +2,6 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-#include "energia.hpp"
-#include "bateria.hpp"
 #include "kart.hpp"
 #include "sensor.hpp"
 #include "telemetria_io.hpp"
@@ -100,18 +98,6 @@ int main() {
     kart1.registrarVolta(61.8);
     kart1.registrarVolta(60.9);
     kart1.registrarVolta(-2.0); // Vai recusar
-
-    Bateria bateria1{100, 20};
-
-    // --- 4. TESTE DO EBOOST NO KART ---
-    const int velAntes = kart1.getVelocidadeKmh();
-    const bool boostOk = kart1.ativarEBoost(bateria1, Energia{40}, 20);
-    const int velDepois = kart1.getVelocidadeKmh();
-
-    std::cout << "Velocidade antes do eBoost: " << velAntes << " km/h" << std::endl;
-    std::cout << "Ativação do eBoost (+20 km/h): " << (boostOk ? "Aceita" : "Recusada") << std::endl;
-    std::cout << "Velocidade depois do eBoost: " << velDepois << " km/h" << std::endl;
-    std::cout << "Carga final da Bateria: " << bateria1.getCargaWh() << " Wh\n" << std::endl;
 
     // --- 5. TESTE DOS SENSORES ---
     kart1.frear(kart1.getVelocidadeKmh()); 
