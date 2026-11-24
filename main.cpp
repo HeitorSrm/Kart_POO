@@ -5,6 +5,7 @@
 #include "kart.hpp"
 #include "sensor.hpp"
 #include "telemetria_io.hpp"
+#include "entrada.hpp"
 
 void display(const Kart& kart) {
     std::cout << "=== TELEMETRIA DO KART ===\n\n";
@@ -76,6 +77,29 @@ int executarLab09(const std::string& entrada, const std::string& boletim) {
     for (const auto& erro : carga.erros) std::cout << "erro " << erro << '\n';
     std::cout << "boletim=" << boletim << '\n';
     return 0;
+}
+
+template <typename T>
+void testarParse(const std::string& texto) {
+    T valor{};
+    std::cout << "  \"" << texto << "\" -> ";
+    if (parse_numero(texto, valor)) {
+        std::cout << "aceito (" << valor << ")\n";
+    } else {
+        std::cout << "recusado\n";
+    }
+}
+
+void demonstrarParseNumero() {
+    std::cout << "\n--- parse_numero<T> ---\n";
+    std::cout << "T = int:\n";
+    testarParse<int>("12");
+    testarParse<int>("12abc");
+    testarParse<int>("12.5");
+    std::cout << "T = double:\n";
+    testarParse<double>("12.5");
+    testarParse<double>("NaN");
+    testarParse<double>("");
 }
 
 int main() {
@@ -172,6 +196,8 @@ int main() {
     std::cout << "\n--- LAB08 Etapa 3: Caminhos ---\n";
     diagnosticarCaminhos(true);  // Sair cedo
     diagnosticarCaminhos(false); // Sair normalmente
+
+    demonstrarParseNumero();
 
     // --- LAB09 ---
     const int codigo09 = executarLab09("dados/telemetria_cometa.csv", "boletim_cometa.txt");
