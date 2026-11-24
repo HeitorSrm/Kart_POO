@@ -4,7 +4,7 @@
 #include <iostream>
 #include "kart.hpp"
 #include "sensor.hpp"
-#include "telemetria_io.hpp"
+#include "entrada.hpp"
 
 void display(const Kart& kart) {
     std::cout << "=== TELEMETRIA DO KART ===\n\n";
@@ -45,37 +45,27 @@ void diagnosticarCaminhos(bool sairCedo) {
     std::cout << "Saindo normalmente...\n";
 } // Dono local sai do escopo
 
-// --- LAB09: do arquivo as leituras confiaveis ---
-// Retorna 0 em sucesso, 2 se a carga falhou, 3 se o boletim nao foi escrito.
-int executarLab09(const std::string& entrada, const std::string& boletim) {
-    std::cout << "\n--- LAB09: Telemetria do Cometa ---\n";
-
-    // 5a) carrega e confere os indicadores ANTES de usar qualquer dado
-    const ResultadoCarga carga = carregar_arquivo(entrada);
-    if (!carga.arquivo_aberto || carga.falha_leitura) {
-        for (const auto& erro : carga.erros) std::cerr << erro << '\n';
-        return 2; // nada e aplicado ao Kart
+template <typename T>
+void testarParse(const std::string& texto) {
+    T valor{};
+    std::cout << "  \"" << texto << "\" -> ";
+    if (parse_numero(texto, valor)) {
+        std::cout << "aceito (" << valor << ")\n";
+    } else {
+        std::cout << "recusado\n";
     }
+}
 
-    // 5b) so agora constroi o Kart e aplica as aceitas, na ordem recebida
-    Kart cometa{"Cometa Solar", "Mario", "CH-002", "azul"};
-    for (const LeituraValidada& leitura : carga.aceitas) {
-        aplicar_no_kart(cometa, leitura);
-    }
-
-    // 5c) gera o boletim e confere o resultado da escrita
-    if (!escrever_boletim(boletim, cometa, carga)) {
-        std::cerr << "nao foi possivel escrever: " << boletim << '\n';
-        return 3;
-    }
-
-    // resumo no terminal
-    std::cout << "arquivo_aberto=true\n";
-    std::cout << "aceitas=" << carga.aceitas.size()
-              << " recusadas=" << carga.erros.size() << '\n';
-    for (const auto& erro : carga.erros) std::cout << "erro " << erro << '\n';
-    std::cout << "boletim=" << boletim << '\n';
-    return 0;
+void demonstrarParseNumero() {
+    std::cout << "\n--- parse_numero<T> ---\n";
+    std::cout << "T = int:\n";
+    testarParse<int>("12");
+    testarParse<int>("12abc");
+    testarParse<int>("12.5");
+    std::cout << "T = double:\n";
+    testarParse<double>("12.5");
+    testarParse<double>("NaN");
+    testarParse<double>("");
 }
 
 int main() {
@@ -173,9 +163,7 @@ int main() {
     diagnosticarCaminhos(true);  // Sair cedo
     diagnosticarCaminhos(false); // Sair normalmente
 
-    // --- LAB09 ---
-    const int codigo09 = executarLab09("dados/telemetria_cometa.csv", "boletim_cometa.txt");
-    if (codigo09 != 0) return codigo09;
+    demonstrarParseNumero();
 
     return 0;
 }
