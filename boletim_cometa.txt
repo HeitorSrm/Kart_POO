@@ -1,0 +1,13 @@
+BOLETIM DO COMETA
+Pressao: 78 kPa - OK
+Temperatura: 108 C - ATENCAO
+Luminosidade: 150 lux - OK
+Farois: DESLIGADOS
+Aceitas: 9
+Recusadas: 6
+Erro: linha 4: valor nao e um numero finito completo
+Erro: linha 5: valor nao e um numero finito completo
+Erro: linha 6: canal desconhecido: GPS
+Erro: linha 14: valor nao e um numero finito completo
+Erro: linha 15: estrutura: esperados 2 campos
+Erro: linha 16: canal vazio
