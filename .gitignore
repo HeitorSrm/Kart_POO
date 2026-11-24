@@ -1,0 +1,6 @@
+programa
+a.out
+*.o
+boletim_cometa.txt
+catalogo_cometa.txt
+.vscode/
