@@ -1,0 +1,4 @@
+id,type,unit
+P-01,pressure,kPa
+T-01,temperature,C
+T-02,temperature,C
