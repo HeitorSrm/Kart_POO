@@ -1,18 +1,9 @@
+#include <string>
 #include <vector>
 #include <memory>
-#include <utility>
 #include <iostream>
-#include <cstdio>
-#include <exception>
-#include "recarga_segura.hpp"
-#include "catalogo_sensores.hpp"
-#include "energia.hpp"
-#include "solar.hpp"
-#include "bateria.hpp"
-#include "powerBank.hpp"
 #include "kart.hpp"
 #include "sensor.hpp"
-#include "kart_configuravel.hpp"
 #include "telemetria_io.hpp"
 
 void display(const Kart& kart) {
@@ -87,66 +78,6 @@ int executarLab09(const std::string& entrada, const std::string& boletim) {
     return 0;
 }
 
-int executarLab10(const std::string& config, const std::string& catalogoPath) {
-    std::cout << "\n--- LAB10: Configuracao e catalogo de sensores ---\n";
-    std::remove(catalogoPath.c_str()); // evita confundir com saida antiga
-
-    const ResultadoConfiguracao carga = carregar_configuracao(config);
-    if (!carga.pronta()) {
-        for (const auto& erro : carga.erros) std::cerr << erro << '\n';
-        return 10;
-    }
-
-    KartConfiguravel configuracao{"Cometa", "Mario", "CH-003", "azul"};
-    std::vector<EntradaCatalogo> catalogo;
-
-    std::string erro;
-    if (!instalar_sensores(configuracao, carga.especificacoes, catalogo, erro)) {
-        std::cerr << "instalacao: " << erro << '\n';
-        return 11;
-    }
-
-    for (const EntradaCatalogo& item : catalogo) displayStatus(*item.observador);
-
-    if (!escrever_catalogo(catalogoPath, catalogo)) {
-        std::cerr << "nao foi possivel escrever: " << catalogoPath << '\n';
-        return 12;
-    }
-    std::cout << "LAB10 instalados=" << catalogo.size()
-              << " catalogo=" << catalogoPath << '\n';
-    return 0;
-}
-
-int executarLab11() {
-    std::cout << "\n--- LAB11: Recarga segura do Cometa ---\n";
-
-    std::unique_ptr<EstadoCometa> ativo;
-    try {
-        ativo = preparar_candidato("dados/configuracao_cometa.csv");
-    } catch (const std::exception& e) {
-        std::cerr << "LAB11 estado inicial falhou: " << e.what() << '\n';
-        return 20;
-    }
-    std::cout << "ANTES:        " << resumo_ativo(*ativo) << '\n';
-
-    try {
-        recarregar(ativo, "dados/recarga_falha_tardia.csv");
-        std::cout << "LAB11 recarga concluida\n";   // não deve aparecer aqui
-    } catch (const std::exception& e) {
-        std::cout << "LAB11 RECUSADA: " << e.what() << '\n';
-    }
-    std::cout << "APOS FALHA:   " << resumo_ativo(*ativo) << '\n';
-
-    try {
-        recarregar(ativo, "dados/recarga_valida.csv");
-        std::cout << "LAB11 recarga concluida\n";
-    } catch (const std::exception& e) {
-        std::cout << "LAB11 RECUSADA: " << e.what() << '\n';
-    }
-    std::cout << "APOS SUCESSO: " << resumo_ativo(*ativo) << '\n';
-    return 0;
-}
-
 int main() {
     // --- TESTES DO KART ---
     Kart kart1("Cometa", "Mario", "CH-001", "Vermelho");
@@ -167,47 +98,6 @@ int main() {
     kart1.registrarVolta(61.8);
     kart1.registrarVolta(60.9);
     kart1.registrarVolta(-2.0); // Vai recusar
-
-    // --- TESTES DE ENERGIA E SOL ---
-    Energia e1{60}, e2{60}, e3{90};
-
-    if (e1 == e2) std::cout << "e1 == e2: Verdadeiro\n";
-    if (e1 != e3) std::cout << "e1 != e3: Verdadeiro\n";
-    if (e1 < e3)  std::cout << "e1 < e3: Verdadeiro\n";
-
-    TempoSol totalSol{0};
-    totalSol += TempoSol{15};
-    totalSol += TempoSol{15};
-
-    PlacaSolar placa{PotenciaSolar{240}};
-    Energia solar = placa.gerar(totalSol);
-    std::cout << "Energia gerada pelo sol: " << solar.emWh() << " Wh\n\n";
-
-    // --- TESTES DE POWERBANK E BATERIA ---
-    PowerBank powerBank1{120};
-    powerBank1.carregar(solar);
-
-    Bateria bateria1{100, 20};
-
-    // Primeira transferência
-    const bool transf1 = powerBank1.transferirPara(bateria1, Energia{60});
-    std::cout << "Transferência de 60 Wh: " << (transf1 ? "Aceita" : "Recusada") << std::endl;
-    std::cout << "Carga da Bateria: " << bateria1.getCargaWh() << " Wh\n" << std::endl;
-
-    // Segunda transferência 
-    const bool transf2 = powerBank1.transferirPara(bateria1, Energia{30});
-    std::cout << "Transferência de 30 Wh: " << (transf2 ? "Aceita" : "Recusada") << std::endl;
-    std::cout << "Carga da Bateria: " << bateria1.getCargaWh() << " Wh\n" << std::endl;
-
-    // --- 4. TESTE DO EBOOST NO KART ---
-    const int velAntes = kart1.getVelocidadeKmh();
-    const bool boostOk = kart1.ativarEBoost(bateria1, Energia{40}, 20);
-    const int velDepois = kart1.getVelocidadeKmh();
-
-    std::cout << "Velocidade antes do eBoost: " << velAntes << " km/h" << std::endl;
-    std::cout << "Ativação do eBoost (+20 km/h): " << (boostOk ? "Aceita" : "Recusada") << std::endl;
-    std::cout << "Velocidade depois do eBoost: " << velDepois << " km/h" << std::endl;
-    std::cout << "Carga final da Bateria: " << bateria1.getCargaWh() << " Wh\n" << std::endl;
 
     // --- 5. TESTE DOS SENSORES ---
     kart1.frear(kart1.getVelocidadeKmh()); 
@@ -283,44 +173,9 @@ int main() {
     diagnosticarCaminhos(true);  // Sair cedo
     diagnosticarCaminhos(false); // Sair normalmente
 
-    // --- LAB08 Etapa 5: Seguindo o mesmo sensor (TEMP-MOTOR-AUX) ---
-    std::cout << "\n--- LAB08 Etapa 5: TEMP-MOTOR-AUX ---\n";
-    {
-        KartConfiguravel config("Cometa", "Piloto", "CH-002", "Vermelho");
-
-        // a) primeiro dono e observador (acesso emprestado)
-        std::unique_ptr<Sensor> origem = std::make_unique<SensorTemperaturaMotor>("TEMP-MOTOR-AUX", 90.0, 105.0);
-        const Sensor* observador = origem.get(); // Observador do sensor original
-
-        // b) transfere a posse e testa o resultado ANTES de usar o observador
-        bool incluido = config.adicionarSensorExtra(std::move(origem));
-        if(!incluido) {
-            std::cout << "Falha ao incluir o sensor extra.\n";
-        } else {
-            // c) origem ficou vazia; observador é o mesmo objeto de sensorExtra(0)
-            std::cout << std::boolalpha;
-            std::cout << "Inclusao concluída: " << incluido << "\n";
-            std::cout << "Origem vazia: " << !origem << "\n";
-            std::cout << "Quantidade: " << config.quantidadeSensoresExtras() << "\n";
-            std::cout << "Mesmo objeto: " << (observador != nullptr && observador == config.sensorExtra(0)) << "\n";
-
-            // d) consulta, atualiza pela configuracao e consulta o mesmo observador
-            displayStatus(*observador);
-            config.atualizarSensorExtra(0, 108.0);
-            displayStatus(*observador);
-        }
-        std::cout << "Saindo do bloco...\n";
-    } // e) config termina: sensoresExtras_ destroi TEMP-MOTOR-AUX
-    std::cout << "Bloco encerrado.\n";
-
     // --- LAB09 ---
     const int codigo09 = executarLab09("dados/telemetria_cometa.csv", "boletim_cometa.txt");
     if (codigo09 != 0) return codigo09;
 
-    // --- LAB10 ---
-    const int codigo10 = executarLab10("dados/configuracao_cometa_reordenada.csv", "catalogo_cometa.txt");
-    if (codigo10 != 0) return codigo10;
-
-    // --- LAB11 ---
-    return executarLab11();
+    return 0;
 }

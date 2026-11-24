@@ -1,7 +1,5 @@
 #ifndef KART_HPP
 #define KART_HPP
-#include "bateria.hpp"
-#include "energia.hpp"
 #include "sensor.hpp"
 
 #include <string>
@@ -28,7 +26,6 @@ public:
     bool abastecer(double litros);
     bool registrarVolta(double tempo);
 
-    bool ativarEBoost(Bateria& bateria, Energia energiaNecessaria, int bonusKmh);
 
     double pressaoPneu() const;
     bool pressaoSegura() const;
